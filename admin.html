@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard Confirmări Eveniment</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 1.5rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa; color: #222;
+  }
+  .dashboard { max-width: 960px; margin: auto; }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.15);
+  }
+  .card h2 {
+    font-size: 2.4rem;
+    margin: 0.3rem 0 0;
+    color: #4a90e2;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .card p {
+    margin: 0;
+    font-size: 1rem;
+    color: #666;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 600px;
+  }
+  thead {
+    background: #4a90e2;
+    color: white;
+  }
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.15s ease;
+  }
+  tbody tr:hover {
+    background-color: #f0f5ff;
+  }
+  tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    user-select: none;
+  }
+  .badge.yes {
+    background-color: #4caf50;
+    color: white;
+  }
+  .badge.no {
+    background-color: #f44336;
+    color: white;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem; }
+    .card h2 { font-size: 1.8rem; }
+    thead th, tbody td { padding: 10px 8px; font-size: 0.85rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+  <section class="summary-cards" aria-label="Rezumat participare">
+    <div class="card" aria-live="polite">
+      <p>Total participanți</p>
+      <h2 id="total">0</h2>
+    </div>
+    <div class="card" aria-live="polite">
+      <p>Confirmări</p>
+      <h2 id="confirmari">0</h2>
+    </div>
+    <div class="card" aria-live="polite">
+      <p>Refuzuri</p>
+      <h2 id="refuzuri">0</h2>
+    </div>
+  </section>
+
+  <section class="table-container" aria-label="Tabel participanți">
+    <table role="grid" aria-describedby="descTable">
+      <thead>
+        <tr>
+          <th scope="col">Nume</th>
+          <th scope="col">Participare</th>
+          <th scope="col">Nr. adulți</th>
+          <th scope="col">Nr. copii</th>
+          <th scope="col">Telefon</th>
+          <th scope="col">Mesaj</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <!-- Datele vor fi inserate din JS -->
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<script>
+  const collectionId = "6874cb5e2df20b5e59cd7d4c";
+  const masterKey = "$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK";
+
+  async function fetchAllBins() {
+    try {
+      // 1. Preluăm lista bin IDs
+      const resBins = await fetch(`https://api.jsonbin.io/v3/c/${collectionId}/bins`, {
+        headers: { "X-Master-Key": masterKey }
+      });
+      if (!resBins.ok) throw new Error(`Eroare la preluarea listei bins: ${resBins.status}`);
+
+      const binsJson = await resBins.json();
+      console.log(binsJson)
+      const binIds = Array.isArray(binsJson) ? binsJson.map(bin => bin.record) : [];
+
+      console.log(binIds)
+      // 2. Preluăm fiecare bin în parte
+      const allData = await Promise.all(binIds.map(async (binId) => {
+        const resBin = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+          headers: { "X-Master-Key": masterKey }
+        });
+        if (!resBin.ok) {
+          console.warn(`Eroare la bin ${binId}: ${resBin.status}`);
+          return null;
+        }
+        const binData = await resBin.json();
+        console.log(binData)
+        return binData.record;
+      }));
+      // 3. Filtrăm datele valide
+      return allData.filter(item => item !== null);
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+
+  async function init() {
+    const data = await fetchAllBins();
+
+    let confirmari = 0, refuzuri = 0;
+    const tbody = document.getElementById("table-body");
+    tbody.innerHTML = "";
+
+    data.forEach(item => {
+      const badge = item.participare === "Da"
+        ? '<span class="badge yes" aria-label="Confirmare participare: Da">Da</span>'
+        : '<span class="badge no" aria-label="Confirmare participare: Nu">Nu</span>';
+
+      if (item.participare === "Da") confirmari++;
+      else if (item.participare === "Nu") refuzuri++;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.nume || "-"}</td>
+        <td>${badge}</td>
+        <td>${item.numar_adulti || "0"}</td>
+        <td>${item.numar_copii || "0"}</td>
+        <td>${item.numar_telefon || "-"}</td>
+        <td>${item.message || ""}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    document.getElementById("total").textContent = data.length;
+    document.getElementById("confirmari").textContent = confirmari;
+    document.getElementById("refuzuri").textContent = refuzuri;
+  }
+
+  // Pornim dashboard
+  init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Sunet la Scroll</title>
+  <style>
+    body {
+      margin: 0;
+      height: 2500px; /* ca să avem scroll */
+      font-family: sans-serif;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+    }
+
+    #enableSoundBtn {
+      padding: 15px 25px;
+      font-size: 18px;
+      background-color: #00bcd4;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+
+    #enableSoundBtn:hover {
+      background-color: #0097a7;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay -->
+  <div id="overlay">
+    <p>🎧 Apasă pentru a activa sunetul</p>
+    <button id="enableSoundBtn">Activează sunetul</button>
+  </div>
+
+  <!-- Audio -->
+  <audio id="myAudio" src="da.mp3"></audio>
+
+  <script>
+    const overlay = document.getElementById('overlay');
+    const enableSoundBtn = document.getElementById('enableSoundBtn');
+    const audio = document.getElementById('myAudio');
+
+    let audioReady = false;
+
+    enableSoundBtn.addEventListener('click', () => {
+      // Încercăm să dăm play — poate fi blocat dar "deblochează" audio-ul pentru mai târziu
+      audio.play().then(() => {
+        audio.pause(); // îl oprim imediat, doar ca să obținem permisiunea
+        audioReady = true;
+
+        overlay.style.display = 'none'; // ascundem overlay-ul
+
+        // Așteptăm scroll-ul
+        window.addEventListener('scroll', () => {
+          if (audioReady && audio.paused) {
+            audio.play();
+            console.log('Sunet pornit la scroll');
+          }
+        }, { once: true });
+
+      }).catch((err) => {
+        alert("Eroare la activarea sunetului: " + err);
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -42,42 +42,10 @@
 <body>
 
   <!-- Overlay -->
-  <div id="overlay">
-    <p>🎧 Apasă pentru a activa sunetul</p>
-    <button id="enableSoundBtn">Activează sunetul</button>
-  </div>
+  
 
   <!-- Audio -->
-  <audio id="myAudio" src="da.mp3"></audio>
-
-  <script>
-    const overlay = document.getElementById('overlay');
-    const enableSoundBtn = document.getElementById('enableSoundBtn');
-    const audio = document.getElementById('myAudio');
-
-    let audioReady = false;
-
-    enableSoundBtn.addEventListener('click', () => {
-      // Încercăm să dăm play — poate fi blocat dar "deblochează" audio-ul pentru mai târziu
-      audio.play().then(() => {
-        audio.pause(); // îl oprim imediat, doar ca să obținem permisiunea
-        audioReady = true;
-
-        overlay.style.display = 'none'; // ascundem overlay-ul
-
-        // Așteptăm scroll-ul
-        window.addEventListener('scroll', () => {
-          if (audioReady && audio.paused) {
-            audio.play();
-            console.log('Sunet pornit la scroll');
-          }
-        }, { once: true });
-
-      }).catch((err) => {
-        alert("Eroare la activarea sunetului: " + err);
-      });
-    });
-  </script>
+  
 
 </body>
 </html>

@@ -167,8 +167,8 @@ form.addEventListener("submit", function (e) {
     method,
     headers: {
       "Content-Type": "application/json",
-      "X-Master-Key":
-        "$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK",
+      "X-Bin-Private": "false",
+      "X-Master-Key":"$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK",
       "X-Collection-Id": "6874cb5e2df20b5e59cd7d4c", // Aici adăugăm ID-ul colecției
     },
     body: JSON.stringify(data),

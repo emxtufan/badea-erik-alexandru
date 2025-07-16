@@ -145,38 +145,41 @@
   const masterKey = "$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK";
 
   async function fetchAllBins() {
-    try {
-      // 1. Preluăm lista bin IDs
-      const resBins = await fetch(`https://api.jsonbin.io/v3/c/${collectionId}/bins`, {
-        headers: { "X-Master-Key": masterKey }
+  try {
+    // 1. Preluăm lista de bin-uri din colecție
+    const resBins = await fetch(`https://api.jsonbin.io/v3/c/${collectionId}/bins`, {
+      headers: { "X-Master-Key": masterKey }
+    });
+    if (!resBins.ok) throw new Error(`Eroare la preluarea listei bins: ${resBins.status}`);
+
+    const binsJson = await resBins.json();
+
+    const binIds = Array.isArray(binsJson) ? binsJson.map(bin => bin.record) : [];
+
+    console.log(binsJson)
+    // 2. Preluăm fiecare bin individual
+    const allData = await Promise.all(binIds.map(async (binId) => {
+      const resBin = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        headers: { "X-Master-Key": '$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK' }
       });
-      if (!resBins.ok) throw new Error(`Eroare la preluarea listei bins: ${resBins.status}`);
+      if (!resBin.ok) {
+        console.warn(`Eroare la bin ${binId}: ${resBin.status}`);
+        return null;
+      }
+      const binData = await resBin.json();
+      console.log(binData)
+      return binData.record;
+    }));
 
-      const binsJson = await resBins.json();
-      console.log(binsJson)
-      const binIds = Array.isArray(binsJson) ? binsJson.map(bin => bin.record) : [];
+    // 3. Returnăm doar datele valide
+    return allData.filter(item => item !== null);
 
-      console.log(binIds)
-      // 2. Preluăm fiecare bin în parte
-      const allData = await Promise.all(binIds.map(async (binId) => {
-        const resBin = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-          headers: { "X-Master-Key": masterKey }
-        });
-        if (!resBin.ok) {
-          console.warn(`Eroare la bin ${binId}: ${resBin.status}`);
-          return null;
-        }
-        const binData = await resBin.json();
-        console.log(binData)
-        return binData.record;
-      }));
-      // 3. Filtrăm datele valide
-      return allData.filter(item => item !== null);
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
+  } catch (error) {
+    console.error("Eroare globală:", error);
+    return [];
   }
+}
+
 
   async function init() {
     const data = await fetchAllBins();

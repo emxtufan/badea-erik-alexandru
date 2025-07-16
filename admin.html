@@ -139,6 +139,16 @@
     </table>
   </section>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+  $.get('/api/proxy', function(data) {
+    console.log('Date primite:', data);
+  }).fail(function(err) {
+    console.error('Eroare:', err);
+  });
+</script>
+
 
 <script>
   const collectionId = "6874cb5e2df20b5e59cd7d4c";
@@ -146,21 +156,16 @@
 
   async function fetchAllBins() {
   try {
-    // 1. Preluăm lista de bin-uri din colecție
     const resBins = await fetch(`https://api.jsonbin.io/v3/c/${collectionId}/bins`, {
       headers: { "X-Master-Key": masterKey }
     });
     if (!resBins.ok) throw new Error(`Eroare la preluarea listei bins: ${resBins.status}`);
-
     const binsJson = await resBins.json();
-
     const binIds = Array.isArray(binsJson) ? binsJson.map(bin => bin.record) : [];
-
     console.log(binsJson)
     // 2. Preluăm fiecare bin individual
     const allData = await Promise.all(binIds.map(async (binId) => {
-      const resBin = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-        headers: { "X-Master-Key": '$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK' }
+      const resBin = await fetch(`https://nextjs-boilerplate-eight-ruby-51.vercel.app/api/proxy?bin=${binId}`, {
       });
       if (!resBin.ok) {
         console.warn(`Eroare la bin ${binId}: ${resBin.status}`);

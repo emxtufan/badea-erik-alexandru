@@ -1,208 +1,192 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Dashboard Confirmări Eveniment</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; }
-  body {
-    margin: 0; padding: 1.5rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f7fa; color: #222;
-  }
-  .dashboard { max-width: 960px; margin: auto; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Confirmări Eveniment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+    .dashboard {
+      max-width: 960px;
+      margin: auto;
+    }
+    .summary-cards {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      margin: 0 10px;
+      text-align: center;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 2rem;
+      color: #4a90e2;
+    }
+    .card p {
+      margin: 5px 0 0;
+      color: #555;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th {
+      background: #4a90e2;
+      color: white;
+    }
+    tr:hover {
+      background: #f9f9f9;
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      display: inline-block;
+    }
+    .yes {
+      background: #4caf50;
+      color: white;
+    }
+    .no {
+      background: #f44336;
+      color: white;
+    }
+    .loader {
+      text-align: center;
+      margin: 20px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
 
-  .summary-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  .card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.2rem 1.5rem;
-    box-shadow: 0 4px 15px rgb(0 0 0 / 0.1);
-    text-align: center;
-    transition: transform 0.2s ease;
-  }
-  .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgb(0 0 0 / 0.15);
-  }
-  .card h2 {
-    font-size: 2.4rem;
-    margin: 0.3rem 0 0;
-    color: #4a90e2;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .card p {
-    margin: 0;
-    font-size: 1rem;
-    color: #666;
-  }
-
-  .table-container {
-    overflow-x: auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 600px;
-  }
-  thead {
-    background: #4a90e2;
-    color: white;
-  }
-  thead th {
-    padding: 12px 16px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 1rem;
-    white-space: nowrap;
-  }
-  tbody tr {
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.15s ease;
-  }
-  tbody tr:hover {
-    background-color: #f0f5ff;
-  }
-  tbody td {
-    padding: 12px 16px;
-    vertical-align: middle;
-    font-size: 0.95rem;
-    white-space: nowrap;
-  }
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    user-select: none;
-  }
-  .badge.yes {
-    background-color: #4caf50;
-    color: white;
-  }
-  .badge.no {
-    background-color: #f44336;
-    color: white;
-  }
-
-  @media (max-width: 600px) {
-    body { padding: 1rem; }
-    .card h2 { font-size: 1.8rem; }
-    thead th, tbody td { padding: 10px 8px; font-size: 0.85rem; }
-  }
-</style>
+      max-height: 600px;    /* înălțimea fixă dorită */
+      overflow-y: auto;     /* scroll vertical dacă e conținut mai mare */
+      overflow-x: auto;     /* păstrăm și scroll orizontal */
+}
+  </style>
 </head>
 <body>
+  <div class="dashboard">
+    <div class="summary-cards">
+      <div class="card">
+        <h2 id="total">0</h2>
+        <p>Total participanți</p>
+      </div>
+      <div class="card">
+        <h2 id="confirmari">0</h2>
+        <p>Confirmări</p>
+      </div>
+      <div class="card">
+        <h2 id="refuzuri">0</h2>
+        <p>Refuzuri</p>
+      </div>
+    </div>
 
-<div class="dashboard">
-  <section class="summary-cards" aria-label="Rezumat participare">
-    <div class="card" aria-live="polite">
-      <p>Total participanți</p>
-      <h2 id="total">0</h2>
-    </div>
-    <div class="card" aria-live="polite">
-      <p>Confirmări</p>
-      <h2 id="confirmari">0</h2>
-    </div>
-    <div class="card" aria-live="polite">
-      <p>Refuzuri</p>
-      <h2 id="refuzuri">0</h2>
-    </div>
-  </section>
-
-  <section class="table-container" aria-label="Tabel participanți">
-    <table role="grid" aria-describedby="descTable">
-      <thead>
+    <div class="loader" id="loader"><div class="spinner"></div></div>
+    <div class="table-container">
+ <table >
+     <thead>
         <tr>
-          <th scope="col">Nume</th>
-          <th scope="col">Participare</th>
-          <th scope="col">Nr. adulți</th>
-          <th scope="col">Nr. copii</th>
-          <th scope="col">Telefon</th>
-          <th scope="col">Mesaj</th>
+          <th>ID</th>
+          <th>Nume</th>
+          <th>Participare</th>
+          <th>Adulți</th>
+          <th>Copii</th>
+          <th>Telefon</th>
+          <th>Mesaj</th>
         </tr>
       </thead>
-      <tbody id="table-body">
-        <!-- Datele vor fi inserate din JS -->
-      </tbody>
+      <tbody id="table-body"></tbody>
     </table>
-  </section>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </div>
+   
+  </div>
 
-<script>
-  $.get('/api/proxy', function(data) {
-    console.log('Date primite:', data);
-  }).fail(function(err) {
-    console.error('Eroare:', err);
-  });
-</script>
+  <script>
+    const collectionId = "6874cb5e2df20b5e59cd7d4c";
+    const masterKey = "$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK";
+    const proxyUrl = "https://nextjs-boilerplate-eight-ruby-51.vercel.app/api/proxy";
 
+    const loader = document.getElementById("loader");
+    const tableBody = document.getElementById("table-body");
 
-<script>
-  const collectionId = "6874cb5e2df20b5e59cd7d4c";
-  const masterKey = "$2a$10$kUW17xI2bsNfU0G3z7qrxuxE0BbGtz8mZ8K7Bf75JWSayMQlimekK";
+    let total = 0, confirmari = 0, refuzuri = 0;
 
-  async function fetchAllBins() {
-  try {
-    const resBins = await fetch(`https://api.jsonbin.io/v3/c/${collectionId}/bins`, {
-      headers: { "X-Master-Key": masterKey }
-    });
-    if (!resBins.ok) throw new Error(`Eroare la preluarea listei bins: ${resBins.status}`);
-    const binsJson = await resBins.json();
-    const binIds = Array.isArray(binsJson) ? binsJson.map(bin => bin.record) : [];
-    console.log(binsJson)
-    // 2. Preluăm fiecare bin individual
-    const allData = await Promise.all(binIds.map(async (binId) => {
-      const resBin = await fetch(`https://nextjs-boilerplate-eight-ruby-51.vercel.app/api/proxy?bin=${binId}`, {
+    function updateSummary() {
+      document.getElementById("total").textContent = total;
+      document.getElementById("confirmari").textContent = confirmari;
+      document.getElementById("refuzuri").textContent = refuzuri;
+    }
+
+    function showLoader() { loader.style.display = "block"; }
+    function hideLoader() { loader.style.display = "none"; }
+
+    async function fetchBinIds(lastBinId = null) {
+      let url = `https://api.jsonbin.io/v3/c/${collectionId}/bins`;
+      if (lastBinId) url += `/${lastBinId}`;
+      const res = await fetch(url, {
+        headers: {
+          "X-Master-Key": masterKey,
+          "X-Sort-Order": "descending"
+        }
       });
-      if (!resBin.ok) {
-        console.warn(`Eroare la bin ${binId}: ${resBin.status}`);
-        return null;
-      }
-      const binData = await resBin.json();
-      console.log(binData)
-      return binData.record;
-    }));
+      if (!res.ok) throw new Error("Eroare la fetch bin list");
+      const data = await res.json();
+      return Array.isArray(data) ? data.map(bin => bin.record) : [];
+    }
 
-    // 3. Returnăm doar datele valide
-    return allData.filter(item => item !== null);
+    async function fetchDataForBin(binId) {
+      const res = await fetch(`${proxyUrl}?bin=${binId}`);
+      if (!res.ok) throw new Error("Eroare la fetch bin data");
+      const json = await res.json();
+      return json.record;
+    }
 
-  } catch (error) {
-    console.error("Eroare globală:", error);
-    return [];
-  }
-}
-
-
-  async function init() {
-    const data = await fetchAllBins();
-
-    let confirmari = 0, refuzuri = 0;
-    const tbody = document.getElementById("table-body");
-    tbody.innerHTML = "";
-
-    data.forEach(item => {
+    function renderRow(item, id) {
+      const tr = document.createElement("tr");
       const badge = item.participare === "Da"
-        ? '<span class="badge yes" aria-label="Confirmare participare: Da">Da</span>'
-        : '<span class="badge no" aria-label="Confirmare participare: Nu">Nu</span>';
-
+        ? '<span class="badge yes">Da</span>'
+        : '<span class="badge no">Nu</span>';
       if (item.participare === "Da") confirmari++;
       else if (item.participare === "Nu") refuzuri++;
+      total++;
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
+      tr.innerHTML = `
+        <td>${id}</td>
         <td>${item.nume || "-"}</td>
         <td>${badge}</td>
         <td>${item.numar_adulti || "0"}</td>
@@ -210,17 +194,37 @@
         <td>${item.numar_telefon || "-"}</td>
         <td>${item.message || ""}</td>
       `;
-      tbody.appendChild(row);
-    });
+      tableBody.appendChild(tr);
+    }
 
-    document.getElementById("total").textContent = data.length;
-    document.getElementById("confirmari").textContent = confirmari;
-    document.getElementById("refuzuri").textContent = refuzuri;
-  }
+    async function loadAllBins() {
+      let index = 1;
+      showLoader();
+      let lastBinId = null;
+      let stop = false;
+      const seen = new Set();
 
-  // Pornim dashboard
-  init();
-</script>
+      while (!stop) {
+        const binIds = await fetchBinIds(lastBinId);
+        if (binIds.length === 0 || seen.has(binIds[binIds.length - 1])) {
+          stop = true;
+          break;
+        }
 
+        for (const binId of binIds) {
+          const data = await fetchDataForBin(binId);
+          renderRow(data, index++);
+        }
+
+        lastBinId = binIds[binIds.length - 1];
+        seen.add(lastBinId);
+      }
+
+      updateSummary();
+      hideLoader();
+    }
+
+    loadAllBins();
+  </script>
 </body>
 </html>
